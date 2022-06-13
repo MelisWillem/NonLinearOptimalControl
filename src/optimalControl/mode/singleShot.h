@@ -98,5 +98,15 @@ namespace optimalControl {
 
 			return fx;
 		}
+
+		double CostGradientFiniteDifference(
+			const std::vector<double>& inputs,
+			std::vector<double>& gradient_out) {
+			assert(std::size(inputs) == gradient_size);
+			assert(std::size(gradient_out) == gradient_size);
+			const auto fx = runtimeAd::EvaluateGradientFiniteDifference(cost, inputs, gradient_out);
+
+			return fx;
+		}
 	};
 }

@@ -58,7 +58,7 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		current_input_horizon[i] = 0;
 	}
 
-	int num_steps = 10000;
+	int num_steps = 10;
 	double cost = problem.Cost(current_input_horizon);
 	double step_rate = 1;
 	std::cout << "Starting with a cost = " << cost << std::endl;
@@ -66,6 +66,9 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 	{
 		std::vector<double> gradient(s);
 		problem.CostGradient(current_input_horizon, gradient);
+
+		std::vector<double> gradientFiniteDifference(s);
+		problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
 
 		// normalize the gradient
 		const auto norm = std::accumulate(gradient.begin(), gradient.end(), 0,
@@ -92,7 +95,7 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 
 		const double new_cost = problem.Cost(current_input_horizon);
 		const double res = cost - new_cost;
-		if (i_step % 100 == 0)
+		if (i_step % 1 == 0)
 		{
 			std::cout << "[" << i_step << "]" << " cost=" << new_cost << "  residual=" << res << std::endl;
 		}
