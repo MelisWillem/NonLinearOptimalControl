@@ -19,15 +19,14 @@ namespace runtimeAd {
 
 		virtual void backward(std::vector<double>& dx_out)  override
 		{
-			// f = g / h
-			// df = (g' * h - g * h') / h^2
-			const auto denominator = left->value * left->value;
+			// d(left/right)/d(left) = 1/right
+			left->grad += (1 / right->value) * grad;
 
-			// d(left*right)/d(left) = right
-			left->grad += (right->value / denominator) * grad;
-
-			// d(left*right)/d(right) = left
-			right->grad += -(left->value / denominator) * grad;
+			// d(left/right)/d(right) 
+			// = d(left*right^{-1})/d(right) 
+			// = -left*(right^{-2}) 
+			// = -left/right^2
+			right->grad += -(left->value / (right->value * right->value)) * grad;
 		}
 
 		virtual std::string ToString() const override {
