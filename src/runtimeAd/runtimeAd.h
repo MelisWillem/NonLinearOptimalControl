@@ -10,6 +10,8 @@
 #include<runtimeAd/expression/geometric.h>
 
 namespace runtimeAd {
+	using Expr = std::shared_ptr<IExpression>;
+
 	inline auto CreateVisitTree(const std::shared_ptr<IExpression>& topNode)
 	{
 		std::vector<std::shared_ptr<IExpression>> to_visit;
@@ -17,6 +19,22 @@ namespace runtimeAd {
 		to_visit.push_back(topNode);
 		topNode->AddChildren(to_visit);
 		return to_visit;
+	}
+
+	inline double EvaluateCost(
+		std::shared_ptr<IExpression> root,
+		const std::vector<double>& x)
+	{
+		const auto to_visit = CreateVisitTree(root);
+
+		// evaluate the function -> forward pass
+		for (int i = std::size(to_visit) - 1; i > -1; --i)
+		{
+			to_visit[i]->forward(x);
+		}
+		const double fx = root->value;
+
+		return fx;
 	}
 
 	/// <summary>
