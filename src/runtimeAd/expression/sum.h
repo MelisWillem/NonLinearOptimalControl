@@ -4,7 +4,6 @@
 #include<memory>
 
 namespace runtimeAd {
-
 	class SumExpression : public BinaryExpression {
 	public:
 		SumExpression(
@@ -14,7 +13,7 @@ namespace runtimeAd {
 
 		virtual void forward(
 			const std::vector<double>& x
-			) override
+		) override
 		{
 			value = left->value + right->value;
 		}

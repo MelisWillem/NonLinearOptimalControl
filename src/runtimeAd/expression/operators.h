@@ -2,6 +2,8 @@
 
 #include<runtimeAd/expression/prod.h>
 #include<runtimeAd/expression/sum.h>
+#include<runtimeAd/expression/sub.h>
+#include<runtimeAd/expression/div.h>
 #include<memory>
 
 namespace runtimeAd {
@@ -47,6 +49,21 @@ namespace runtimeAd {
 		const std::shared_ptr<TRight> right)
 	{
 		return std::make_shared<ProdExpression>(
+			std::dynamic_pointer_cast<IExpression>(left),
+			std::dynamic_pointer_cast<IExpression>(right));
+	}
+
+	template<
+		typename TLeft,
+		typename TRight,
+		typename = std::enable_if_t<std::is_base_of_v<IExpression, TLeft>>,
+		typename = std::enable_if_t<std::is_base_of_v<IExpression, TRight>>
+	>
+	inline std::shared_ptr<IExpression> operator/(
+		std::shared_ptr<TLeft> left,
+		std::shared_ptr<TRight> right)
+	{
+		return std::make_shared<DivExpression>(
 			std::dynamic_pointer_cast<IExpression>(left),
 			std::dynamic_pointer_cast<IExpression>(right));
 	}
