@@ -3,6 +3,6 @@ add_library(optimalControl STATIC
 	"optimalControl.cpp"
     "integrators/explicit_euler.h" 
 	"systemBehavior.h" 
-	"integrators/runga_kutta.h")
+	"integrators/runga_kutta.h" "simulator.h")
 
 target_include_directories(optimalControl PRIVATE "${PROJECT_SOURCE_DIR}/src")

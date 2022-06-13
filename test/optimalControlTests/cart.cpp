@@ -17,16 +17,14 @@ class CartBehavior : public optimalControl::ContiniousSystemBehavior
 	virtual multi_expr dot(multi_expr& current_state, multi_expr& current_input) override {
 		using namespace runtimeAd;
 		const double m = 1;
-		// TODO::implement devision on runtimeAd
-		auto inv_var_m = runtimeAd::Constant(1 / m);
 
 		multi_expr next_state;
 		next_state.push_back(current_state[2]);
 		next_state.push_back(current_state[3]);
-		next_state.push_back(current_input[0] * inv_var_m);
-		next_state.push_back(current_input[1] * inv_var_m);
+		next_state.push_back(current_input[0] / runtimeAd::Constant(m));
+		next_state.push_back(current_input[1] / runtimeAd::Constant(m));
 
-		return current_state;
+		return next_state;
 	}
 };
 
@@ -40,24 +38,36 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 	optimalControl::SingleShot::InitParams params;
 	params.num_of_input = 2; // 2D motoro speed
 	params.num_of_states = 4; // 2D position + speed of body
-	params.num_of_steps_horizon = 100;
+	params.num_of_steps_horizon = 10;
 	params.system = &discrete_system;
 
 	optimalControl::SingleShot problem(params);
 	auto s = problem.GradientSize();
 
-	std::vector<double> current_input_horizon(s, 0);
+	// Start at origin at stand still.
+	std::vector<double> init_state = { 0,0, 0,0 };
+	problem.SetInitState(init_state);
 
-	int num_steps = 10;
-	const double start_cost = problem.Cost(current_input_horizon);
-	double step_rate = 0.1;
-	std::cout << "Starting with a cost = " << start_cost << std::endl;
+	// End at (10, 10) at standing still.
+	std::vector<double> ref_state = { 10, 10 , 0, 0 };
+	problem.SetRefState(ref_state);
+
+	std::vector<double> current_input_horizon(s);
+	for (int i = 0; i < std::size(current_input_horizon); ++i)
+	{
+		current_input_horizon[i] = 0;
+	}
+
+	int num_steps = 10000;
+	double cost = problem.Cost(current_input_horizon);
+	double step_rate = 1;
+	std::cout << "Starting with a cost = " << cost << std::endl;
 	for (int i_step = 0; i_step < num_steps; ++i_step)
 	{
 		std::vector<double> gradient(s);
-		const auto cost = problem.CostGradient(current_input_horizon, gradient);
+		problem.CostGradient(current_input_horizon, gradient);
 
-		// normalize gradeint
+		// normalize the gradient
 		const auto norm = std::accumulate(gradient.begin(), gradient.end(), 0,
 			[&](double acc, double val)->double {
 				return acc + val * val;
@@ -69,10 +79,35 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 
 		// add gradient to inputs
 		for (int i = 0; i < std::size(gradient); ++i) {
-			current_input_horizon[i] = current_input_horizon[i] + gradient[i] * step_rate;
+			current_input_horizon[i] = current_input_horizon[i] - gradient[i] * step_rate;
 		}
 
-		double current_cost = problem.Cost(current_input_horizon);
-		std::cout << "[" << i_step << "]" << " cost=" << current_cost << std::endl;
+		// clip the input horizon
+		const double max_input = 1;
+		const double min_input = -1;
+		for (int i = 0; i < std::size(gradient); ++i) {
+			current_input_horizon[i] = std::max(current_input_horizon[i], min_input);
+			current_input_horizon[i] = std::min(current_input_horizon[i], max_input);
+		}
+
+		const double new_cost = problem.Cost(current_input_horizon);
+		const double res = cost - new_cost;
+		if (i_step % 100 == 0)
+		{
+			std::cout << "[" << i_step << "]" << " cost=" << new_cost << "  residual=" << res << std::endl;
+		}
+		cost = new_cost;
 	}
+
+	// apply the inputs to a simulator of the system
+	std::cout << "Simulating with the input horizon ..." << std::endl;
+	optimalControl::Simulator sim(discrete_system, number_of_inputs, number_of_states);
+	auto final_state = sim.Simulate(init_state, current_input_horizon);
+
+	std::cout << "final state: [";
+	for (int i = 0; i < std::size(final_state); ++i) {
+		std::cout << final_state[i] << "; ";
+	}
+	std::cout << "]" << std::endl;
+
 }
