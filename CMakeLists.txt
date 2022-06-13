@@ -37,7 +37,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory("${CMAKE_SOURCE_DIR}/src/runtimeAd")
+add_subdirectory("${CMAKE_SOURCE_DIR}/src/optimalControl")
 add_subdirectory("${CMAKE_SOURCE_DIR}/test/runtimeAdTests")
+add_subdirectory("${CMAKE_SOURCE_DIR}/test/optimalControlTests")
 
 enable_testing()
 
