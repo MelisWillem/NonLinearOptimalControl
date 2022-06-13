@@ -68,4 +68,28 @@ namespace runtimeAd {
 
 		return fx;
 	}
+
+	inline double EvaluateGradientFiniteDifference(
+		std::shared_ptr<IExpression> root,
+		const std::vector<double>& x,
+		std::vector<double>& dx)
+	{
+		const double f_eval = EvaluateCost(root, x);
+
+		const double eps = 1e-6;
+		std::vector<double> diff(std::size(x));
+		for (int i_diff = 0; i_diff < std::size(x); i_diff++)
+		{
+			for (int i = 0; i < std::size(x); ++i)
+			{
+				diff[i] = x[i];
+			}
+			diff[i_diff] = diff[i_diff] + eps;
+			const double f_eval_eps = EvaluateCost(root, diff);
+
+			dx[i_diff] = (f_eval_eps - f_eval) / eps;
+		}
+
+		return f_eval;
+	}
 }
