@@ -11,9 +11,8 @@ namespace runtimeAd {
 		double value = 0;
 		double grad = 0;
 
-		void ZeroGrad()
+		virtual void ZeroGrad()
 		{
-			value = 0;
 			grad = 0;
 		}
 
@@ -37,6 +36,13 @@ namespace runtimeAd {
 			std::shared_ptr<IExpression> right) :
 			left(left), right(right) {}
 
+		virtual void ZeroGrad()
+		{
+			grad = 0;
+			left->ZeroGrad();
+			right->ZeroGrad();
+		}
+
 		virtual void AddChildren(std::vector<std::shared_ptr<IExpression>>& visits) const override {
 			const int current_location = std::size(visits) - 1;
 			visits.push_back(left);
@@ -52,8 +58,14 @@ namespace runtimeAd {
 
 		UnitaryExpression(std::shared_ptr<IExpression> expr) : expr(expr) {}
 
+		virtual void ZeroGrad()
+		{
+			grad = 0;
+			expr->ZeroGrad();
+		}
+
 		virtual void AddChildren(std::vector<std::shared_ptr<IExpression>>& visits) const override {
-			visits.push_back( expr);
+			visits.push_back(expr);
 			expr->AddChildren(visits);
 		}
 	};

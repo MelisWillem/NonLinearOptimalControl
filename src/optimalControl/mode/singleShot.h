@@ -39,6 +39,10 @@ namespace optimalControl {
 		SingleShot(InitParams& params)
 		{
 			gradient_size = params.num_of_input * params.num_of_steps_horizon;
+			for (int i = 0; i < gradient_size; ++i)
+			{
+				input_horizon.push_back(runtimeAd::Var(i));
+			}
 
 			for (int i = 0; i < params.num_of_states; ++i)
 			{
@@ -58,7 +62,7 @@ namespace optimalControl {
 			// set the cost of the initial state
 			for (int i = 0; i < params.num_of_states; i++)
 			{
-				cost = cost + runtimeAd::Abs(state[i] - ref_state[i]);
+				cost = cost + (state[i] - ref_state[i]) * (state[i] - ref_state[i]);
 			}
 
 			// walk over the horizon
@@ -76,7 +80,7 @@ namespace optimalControl {
 				// Evaluate the constraint on the new state.
 				for (int i = 0; i < params.num_of_states; i++)
 				{
-					cost = cost + Abs(state[i] - ref_state[i]);
+					cost = cost + (state[i] - ref_state[i]) * (state[i] - ref_state[i]);
 				}
 			}
 
