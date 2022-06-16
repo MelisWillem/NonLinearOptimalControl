@@ -5,7 +5,8 @@ add_executable(runtimeAdTests
 	geoTests.cpp 
 	wikiExampleTests.cpp 
 	divTests.cpp 
-	absTests.cpp)
+	absTests.cpp
+	recursiveFunctionTests.cpp)
 target_link_libraries(runtimeAdTests PUBLIC Catch2::Catch2)
 
 target_include_directories(runtimeAdTests PRIVATE "${PROJECT_SOURCE_DIR}/src")
