@@ -15,6 +15,7 @@ namespace runtimeAd {
 			const std::vector<double>& x)  override
 		{
 			value = left->value / right->value;
+			assert(!isnan(value));
 		}
 
 		virtual void backward(std::vector<double>& dx_out)  override

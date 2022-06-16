@@ -17,12 +17,13 @@ class CartBehavior : public optimalControl::ContiniousSystemBehavior
 	virtual multi_expr dot(multi_expr& current_state, multi_expr& current_input) override {
 		using namespace runtimeAd;
 		const double m = 1;
+		auto constant_m = runtimeAd::Constant(m);
 
 		multi_expr next_state;
 		next_state.push_back(current_state[2]);
 		next_state.push_back(current_state[3]);
-		next_state.push_back(current_input[0] / runtimeAd::Constant(m));
-		next_state.push_back(current_input[1] / runtimeAd::Constant(m));
+		next_state.push_back(current_input[0] / constant_m);
+		next_state.push_back(current_input[1] / constant_m);
 
 		return next_state;
 	}
@@ -60,7 +61,7 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 
 	int num_steps = 10;
 	double cost = problem.Cost(current_input_horizon);
-	double step_rate = 1;
+	// double step_rate = 1e3;
 	std::cout << "Starting with a cost = " << cost << std::endl;
 	for (int i_step = 0; i_step < num_steps; ++i_step)
 	{
@@ -70,19 +71,9 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		std::vector<double> gradientFiniteDifference(s);
 		problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
 
-		// normalize the gradient
-		const auto norm = std::accumulate(gradient.begin(), gradient.end(), 0,
-			[&](double acc, double val)->double {
-				return acc + val * val;
-			});
-		for (int i = 0; i < std::size(gradient); ++i)
-		{
-			gradient[i] = gradient[i] / norm;
-		}
-
 		// add gradient to inputs
 		for (int i = 0; i < std::size(gradient); ++i) {
-			current_input_horizon[i] = current_input_horizon[i] - gradient[i] * step_rate;
+			current_input_horizon[i] = current_input_horizon[i] - gradient[i];
 		}
 
 		// clip the input horizon

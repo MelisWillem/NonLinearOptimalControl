@@ -17,9 +17,8 @@ namespace runtimeAd {
 		std::vector<std::shared_ptr<IExpression>> to_visit;
 		std::set<IExpression*> nodes_visited;
 
-		// -1 means no parent, not a problem as this is the seed element
-		to_visit.push_back(topNode);
 		topNode->AddChildren(to_visit, nodes_visited);
+		to_visit.push_back(topNode);
 		return to_visit;
 	}
 
@@ -30,9 +29,10 @@ namespace runtimeAd {
 		const auto to_visit = CreateVisitTree(root);
 
 		// evaluate the function -> forward pass
-		for (int i = std::size(to_visit) - 1; i > -1; --i)
+		for (int i = 0; i < std::size(to_visit); ++i)
 		{
 			to_visit[i]->forward(x);
+			auto str_expr = to_visit[i]->ToString();
 		}
 		const double fx = root->value;
 
@@ -52,19 +52,21 @@ namespace runtimeAd {
 		std::vector<double>& dx)
 	{
 		const auto to_visit = CreateVisitTree(root);
+		root->ZeroGrad();
 
 		// evaluate the function -> forward pass
-		for (int i = std::size(to_visit) - 1; i > -1; --i)
+		for (int i = 0; i < std::size(to_visit); ++i)
 		{
+			auto str_expr = to_visit[i]->ToString();
 			to_visit[i]->forward(x);
 		}
 		const double fx = root->value;
 
-		root->ZeroGrad();
 		root->grad = 1; // set the seed
 		// evaluate the gradient -> backward pass
-		for (int i = 0; i < std::size(to_visit); ++i)
+		for (int i = std::size(to_visit) - 1; i > -1; --i)
 		{
+			auto str_expr = to_visit[i]->ToString();
 			to_visit[i]->backward(dx);
 		}
 
@@ -77,6 +79,7 @@ namespace runtimeAd {
 		std::vector<double>& dx)
 	{
 		const double f_eval = EvaluateCost(root, x);
+		auto f_str = root->ToString();
 
 		const double eps = 1e-6;
 		std::vector<double> diff(std::size(x));
@@ -87,6 +90,7 @@ namespace runtimeAd {
 				diff[i] = x[i];
 			}
 			diff[i_diff] = diff[i_diff] + eps;
+			root->ZeroGrad();
 			const double f_eval_eps = EvaluateCost(root, diff);
 
 			dx[i_diff] = (f_eval_eps - f_eval) / eps;
