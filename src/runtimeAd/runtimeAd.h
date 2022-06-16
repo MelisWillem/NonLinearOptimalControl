@@ -15,9 +15,11 @@ namespace runtimeAd {
 	inline auto CreateVisitTree(const std::shared_ptr<IExpression>& topNode)
 	{
 		std::vector<std::shared_ptr<IExpression>> to_visit;
+		std::set<IExpression*> nodes_visited;
+
 		// -1 means no parent, not a problem as this is the seed element
 		to_visit.push_back(topNode);
-		topNode->AddChildren(to_visit);
+		topNode->AddChildren(to_visit, nodes_visited);
 		return to_visit;
 	}
 

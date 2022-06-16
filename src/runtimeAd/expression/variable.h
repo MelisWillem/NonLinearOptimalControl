@@ -30,6 +30,8 @@ namespace runtimeAd {
 			grad = 0; // reset grad so the same stuff doesn't get added twice
 		}
 
+		virtual bool VisitEveryTime() const override {return true;}
+
 		virtual std::string ToString() const override {
 			return "x[" + std::to_string(location) + "]";
 		}
