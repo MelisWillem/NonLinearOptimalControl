@@ -16,6 +16,7 @@ namespace runtimeAd {
 		virtual void ZeroGrad()
 		{
 			grad = 0;
+			value = 0;
 		}
 
 		virtual ~IExpression() = default;
@@ -30,6 +31,7 @@ namespace runtimeAd {
 		virtual std::string ToString() const = 0;
 
 		virtual bool VisitEveryTime() const {return false;}
+		virtual bool VisitRequired() const { return true; }
 	};
 
 	template<typename TExpr>
@@ -60,6 +62,7 @@ namespace runtimeAd {
 		virtual void ZeroGrad()
 		{
 			grad = 0;
+			value = 0;
 			left->ZeroGrad();
 			right->ZeroGrad();
 		}
@@ -67,27 +70,18 @@ namespace runtimeAd {
 		virtual void AddChildren(
 				std::vector<std::shared_ptr<IExpression>>& visits,
 				std::set<IExpression*> nodes_already_visited) const override {
-			bool add_left_children = false;
-			bool add_right_children = false;
-			if(NeedsVisit(nodes_already_visited, left))
-			{
-				visits.push_back(left);
-				nodes_already_visited.insert(left.get());
-				add_left_children = true;
-			}
-			if(NeedsVisit(nodes_already_visited, right))
-			{
-				visits.push_back(right);
-				nodes_already_visited.insert(right.get());
-				add_right_children = true;
-			}
-			if(add_left_children)
+			// depth first
+			if(left->VisitRequired() && NeedsVisit(nodes_already_visited, left))
 			{
 				left->AddChildren(visits, nodes_already_visited);
+				visits.push_back(left);
+				nodes_already_visited.insert(left.get());
 			}
-			if(add_right_children)
+			if(right->VisitRequired() && NeedsVisit(nodes_already_visited, right))
 			{
 				right->AddChildren(visits, nodes_already_visited);
+				visits.push_back(right);
+				nodes_already_visited.insert(right.get());
 			}
 		}
 	};
@@ -101,16 +95,17 @@ namespace runtimeAd {
 		virtual void ZeroGrad()
 		{
 			grad = 0;
+			value = 0;
 			expr->ZeroGrad();
 		}
 
 		virtual void AddChildren(
 				std::vector<std::shared_ptr<IExpression>>& visits,
 				std::set<IExpression*> nodes_already_visited) const override {
-			if(NeedsVisit(nodes_already_visited, expr)){
+			if(expr->VisitRequired() && NeedsVisit(nodes_already_visited, expr)){
+				expr->AddChildren(visits, nodes_already_visited);
 				visits.push_back(expr);
 				nodes_already_visited.insert(expr.get());
-				expr->AddChildren(visits, nodes_already_visited);
 			}
 		}
 	};

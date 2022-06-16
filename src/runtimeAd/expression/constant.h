@@ -6,6 +6,11 @@ namespace runtimeAd {
 	class ConstantValue : public IExpression
 	{
 	public:
+		virtual void ZeroGrad() override {}
+
+		virtual bool VisitRequired() const override { return false; }
+
+		ConstantValue() = delete;
 
 		ConstantValue(double value)
 		{

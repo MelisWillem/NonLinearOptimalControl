@@ -4,22 +4,23 @@
 
 namespace runtimeAd {
 	class Variable : public IExpression {
-		int location;
+		const int location;
 
 	public:
-		Variable(int location)
-		{
-			this->location = location;
-		}
+		Variable(int location) : location(location) {}
 
-		double Value(const std::vector<double> x) const { return x[location]; }
+		Variable(const Variable&) = delete;
+
+		double Value(const std::vector<double>& x) const 
+		{ 
+			assert(location > -1);
+			assert(std::size(x) > location);
+			return x[location]; 
+		}
 
 		virtual void forward(const std::vector<double>& x) override
 		{
-			assert(location > -1);
-			assert(std::size(x) > location);
-
-			value = x[location];
+			value = Value(x);
 		}
 
 		virtual void backward(std::vector<double>& dx_out) override
