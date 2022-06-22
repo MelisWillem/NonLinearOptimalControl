@@ -6,6 +6,7 @@
 namespace runtimeAd {
 	class ProdExpression : public BinaryExpression {
 	public:
+		ProdExpression(const ProdExpression&) = delete;
 		ProdExpression(
 			std::shared_ptr<IExpression> left,
 			std::shared_ptr<IExpression> right

@@ -6,6 +6,8 @@ namespace runtimeAd {
 	class ConstantValue : public IExpression
 	{
 	public:
+		ConstantValue(const ConstantValue&) = delete;
+
 		virtual void ZeroGrad() override {}
 
 		virtual bool VisitRequired() const override { return false; }
@@ -31,6 +33,8 @@ namespace runtimeAd {
 		virtual std::string ToString() const override {
 			return "C(" + std::to_string(value) + ")";
 		}
+
+		virtual bool Skip() const override { return true; }
 	};
 
 	inline std::shared_ptr<ConstantValue> Constant(double value = 0)

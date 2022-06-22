@@ -5,6 +5,7 @@
 namespace runtimeAd {
 	class SubExpression : public BinaryExpression {
 	public:
+		SubExpression(const SubExpression&) = delete;
 		SubExpression(
 			std::shared_ptr<IExpression> left,
 			std::shared_ptr<IExpression> right

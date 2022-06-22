@@ -52,6 +52,7 @@ namespace runtimeAd {
 		std::vector<double>& dx)
 	{
 		const auto to_visit = CreateVisitTree(root);
+
 		root->ZeroGrad();
 
 		// evaluate the function -> forward pass
