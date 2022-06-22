@@ -6,16 +6,18 @@
 namespace runtimeAd {
 	class CosExpression : public UnitaryExpression {
 	public:
+		CosExpression(const CosExpression&) = delete;
+
 		CosExpression(std::shared_ptr<IExpression> expr) : UnitaryExpression(expr) {}
 
-		virtual void forward( const std::vector<double>& x ) override
+		virtual void forward(const std::vector<double>& x) override
 		{
 			value = std::cos(expr->value);
 		}
 
 		virtual void backward(std::vector<double>& dx_out)  override
 		{
-			expr->grad += -std::sin(expr->value)*grad;
+			expr->grad += -std::sin(expr->value) * grad;
 		}
 
 		virtual std::string ToString() const override {
@@ -36,6 +38,8 @@ namespace runtimeAd {
 
 	class SinExpression : public UnitaryExpression {
 	public:
+		SinExpression(const SinExpression&) = delete;
+
 		SinExpression(std::shared_ptr<IExpression> expr) : UnitaryExpression(expr) {}
 
 		virtual void forward(

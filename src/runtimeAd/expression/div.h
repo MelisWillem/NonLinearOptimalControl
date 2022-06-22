@@ -6,6 +6,8 @@
 namespace runtimeAd {
 	class DivExpression : public BinaryExpression {
 	public:
+		DivExpression(const DivExpression&) = delete;
+
 		DivExpression(
 			std::shared_ptr<IExpression> left,
 			std::shared_ptr<IExpression> right
