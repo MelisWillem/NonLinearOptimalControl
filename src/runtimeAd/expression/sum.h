@@ -6,6 +6,7 @@
 namespace runtimeAd {
 	class SumExpression : public BinaryExpression {
 	public:
+		SumExpression(const SumExpression&) = delete;
 		SumExpression(
 			std::shared_ptr<IExpression> left,
 			std::shared_ptr<IExpression> right

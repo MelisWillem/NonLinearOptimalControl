@@ -5,6 +5,8 @@
 namespace runtimeAd {
 	class AbsExpression : public UnitaryExpression {
 	public:
+		AbsExpression(const AbsExpression&) = delete;
+
 		AbsExpression(std::shared_ptr<IExpression> expr) : UnitaryExpression(expr) {}
 
 		virtual void forward(const std::vector<double>& x) override

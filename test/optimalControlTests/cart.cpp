@@ -68,8 +68,8 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		std::vector<double> gradient(s);
 		problem.CostGradient(current_input_horizon, gradient);
 
-		std::vector<double> gradientFiniteDifference(s);
-		problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
+		// std::vector<double> gradientFiniteDifference(s);
+		// problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
 
 		// add gradient to inputs
 		for (int i = 0; i < std::size(gradient); ++i) {

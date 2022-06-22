@@ -7,15 +7,14 @@ namespace runtimeAd {
 		const int location;
 
 	public:
+		Variable(const Variable&) = delete;
 		Variable(int location) : location(location) {}
 
-		Variable(const Variable&) = delete;
-
-		double Value(const std::vector<double>& x) const 
-		{ 
+		double Value(const std::vector<double>& x) const
+		{
 			assert(location > -1);
 			assert(std::size(x) > location);
-			return x[location]; 
+			return x[location];
 		}
 
 		virtual void forward(const std::vector<double>& x) override
@@ -31,7 +30,7 @@ namespace runtimeAd {
 			grad = 0; // reset grad so the same stuff doesn't get added twice
 		}
 
-		virtual bool VisitEveryTime() const override {return true;}
+		virtual bool VisitEveryTime() const override { return true; }
 
 		virtual std::string ToString() const override {
 			return "x[" + std::to_string(location) + "]";
