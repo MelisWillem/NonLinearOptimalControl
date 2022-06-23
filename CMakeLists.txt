@@ -43,4 +43,5 @@ add_subdirectory("${CMAKE_SOURCE_DIR}/test/optimalControlTests")
 
 enable_testing()
 
-add_test(NAME solverTests COMMAND runtimeAdTests)
+add_test(NAME runtimeAdTests COMMAND runtimeAdTests)
+add_test(NAME optimalControlTests COMMAND optimalControlTests)
