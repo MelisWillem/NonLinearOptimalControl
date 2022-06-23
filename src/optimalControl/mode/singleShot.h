@@ -1,5 +1,6 @@
 #include<runtimeAd/runtimeAd.h>
 #include <optimalControl/systemBehavior.h>
+#include <optimalControl/constraints/weightedL2.h>
 
 namespace optimalControl {
 	class SingleShot {
@@ -35,6 +36,7 @@ namespace optimalControl {
 			int num_of_input;
 			int num_of_states;
 			int num_of_steps_horizon;
+			WeightedL2Constraint state_constraint;
 		};
 
 		SingleShot(InitParams& params)
@@ -61,28 +63,23 @@ namespace optimalControl {
 			// start with a cost of zero
 			auto cost = std::dynamic_pointer_cast<runtimeAd::IExpression>(runtimeAd::Constant(0));
 			// set the cost of the initial state
-			for (int i = 0; i < params.num_of_states; i++)
-			{
-				cost = cost + (state[i] - ref_state[i]) * (state[i] - ref_state[i]);
-			}
+			cost = cost + params.state_constraint.Eval(state, ref_state);
 
 			// walk over the horizon
 			for (int i_step = 0; i_step < params.num_of_steps_horizon; ++i_step)
 			{
 				// Put the inputs of this step into expression form.
 				std::vector<std::shared_ptr<runtimeAd::IExpression>> inputs(params.num_of_input);
+				const int start_index_input_horizon = i_step * params.num_of_input;
 				for (int i = 0; i < params.num_of_input; ++i)
 				{
-					const int start_index_input_horizon = i_step * params.num_of_input;
 					inputs[i] = input_horizon[start_index_input_horizon + i];
 				}
 
 				state = params.system->Next(state, inputs);
+
 				// Evaluate the constraint on the new state.
-				for (int i = 0; i < params.num_of_states; i++)
-				{
-					cost = cost + (state[i] - ref_state[i]) * (state[i] - ref_state[i]);
-				}
+				cost = cost + params.state_constraint.Eval(state, ref_state);
 			}
 
 			this->cost = cost;
