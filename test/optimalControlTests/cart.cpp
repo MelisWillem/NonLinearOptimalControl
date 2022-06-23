@@ -57,6 +57,8 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 	params.num_of_states = 4; // 2D position + speed of body
 	params.num_of_steps_horizon = 10;
 	params.system = &discrete_system;
+	optimalControl::WeightedL2Constraint state_constraint({ 10.0, 10.0, 0.0, 0.0 });
+	params.state_constraint = state_constraint;
 
 	optimalControl::SingleShot problem(params);
 	auto s = problem.GradientSize();
@@ -66,7 +68,7 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 	problem.SetInitState(init_state);
 
 	// End at (10, 10) at standing still.
-	std::vector<double> ref_state = { 10, 10 , 0, 0 };
+	std::vector<double> ref_state = { 10, 10 , 5, 5 };
 	problem.SetRefState(ref_state);
 
 	std::vector<double> current_input_horizon(s);
@@ -84,13 +86,13 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		std::vector<double> gradient(s);
 		problem.CostGradient(current_input_horizon, gradient);
 
-		// std::vector<double> gradientFiniteDifference(s);
-		// problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
-		// for (int i = 0; i < std::size(gradientFiniteDifference); ++i)
-		// {
-		// 	auto diff = std::abs(gradient[i] - gradientFiniteDifference[i]);
-		// 	assert(diff < 1e-3);
-		// }
+		std::vector<double> gradientFiniteDifference(s);
+		problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
+		for (int i = 0; i < std::size(gradientFiniteDifference); ++i)
+		{
+			auto diff = std::abs(gradient[i] - gradientFiniteDifference[i]);
+			REQUIRE(diff < 1e-3);
+		}
 
 		// Normalize(gradient);
 
@@ -100,8 +102,8 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		}
 
 		// clip the input horizon
-		const double max_input = 10;
-		const double min_input = -10;
+		const double max_input = 30;
+		const double min_input = -30;
 		for (int i = 0; i < std::size(gradient); ++i) {
 			current_input_horizon[i] = std::max(current_input_horizon[i], min_input);
 			current_input_horizon[i] = std::min(current_input_horizon[i], max_input);
@@ -126,5 +128,10 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		std::cout << final_state[i] << "; ";
 	}
 	std::cout << "]" << std::endl;
+
+	for (int i = 0; i < std::size(current_input_horizon) / 2; i++)
+	{
+		std::cout << "{" << current_input_horizon[i * 2] << "; " << current_input_horizon[i * 2 + 1] << "}";
+	}
 
 }
