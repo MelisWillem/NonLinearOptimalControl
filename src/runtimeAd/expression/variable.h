@@ -27,9 +27,14 @@ namespace runtimeAd {
 			// write away the value to the actual output vector
 			// add to it, as it may contain multiple terms
 			dx_out[location] += grad;
-			grad = 0; // reset grad so the same stuff doesn't get added twice
+			// reset grad so the same stuff doesn't get added twice
+			// -> VisitEveryTime() = True here
+			grad = 0;
 		}
 
+		// Every variable must be visited multiple times, as
+		// there is no garantue that it has the same instance.
+		// It functions like a value type and not a reference type.
 		virtual bool VisitEveryTime() const override { return true; }
 
 		virtual std::string ToString() const override {
