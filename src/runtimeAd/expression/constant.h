@@ -10,8 +10,6 @@ namespace runtimeAd {
 
 		virtual void ZeroGrad() override {}
 
-		virtual bool VisitRequired() const override { return false; }
-
 		ConstantValue() = delete;
 
 		ConstantValue(double value)
@@ -34,7 +32,7 @@ namespace runtimeAd {
 			return "C(" + std::to_string(value) + ")";
 		}
 
-		virtual bool Skip() const override { return true; }
+		virtual bool GradientRequired() const override { return false; }
 	};
 
 	inline std::shared_ptr<ConstantValue> Constant(double value = 0)
