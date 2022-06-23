@@ -26,7 +26,6 @@ TEST_CASE("Compare_Finite_Diff_With_Back_Prob_Prod")
 	auto b = Var(1);
 
 	auto f = a * a + Constant(2) * b + a * b;
-
 	std::vector<double> x = { 2, 3 };
 	auto f_eval = EvaluateCost(f, x);
 

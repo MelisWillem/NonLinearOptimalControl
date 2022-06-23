@@ -12,9 +12,9 @@
 namespace runtimeAd {
 	using Expr = std::shared_ptr<IExpression>;
 
-	inline auto CreateVisitTree(const std::shared_ptr<IExpression>& topNode)
+	inline auto CreateVisitTree(IExpression* topNode)
 	{
-		std::vector<std::shared_ptr<IExpression>> to_visit;
+		std::vector<IExpression*> to_visit;
 		std::set<IExpression*> nodes_visited;
 
 		topNode->AddChildren(to_visit, nodes_visited);
@@ -22,17 +22,65 @@ namespace runtimeAd {
 		return to_visit;
 	}
 
+	class Function {
+		std::vector<IExpression*> visits;
+
+	public:
+		Function(std::shared_ptr<IExpression> root) : visits(CreateVisitTree(root.get())) {}
+		Function(IExpression* root) : visits(CreateVisitTree(root)) {}
+		Function() {}
+
+		double Eval(const std::vector<double>& x) {
+			if (std::empty(visits)) { return 0; }
+			auto* root = visits.back();
+			root->ZeroGrad();
+
+			// evaluate the function -> forward pass
+			for (int i = 0; i < std::size(visits); ++i)
+			{
+				visits[i]->forward(x);
+			}
+			const double fx = root->value;
+
+			return fx;
+
+		}
+
+		double EvalGradient(const std::vector<double>& x, std::vector<double>& dx_out)
+		{
+			for (int i = 0; i < std::size(dx_out); ++i) { dx_out[i] = 0; }
+			if (std::empty(visits)) { return 0; }
+
+			auto* root = visits.back();
+			const double fx = Eval(x);
+
+			root->grad = 1; // set the seed
+			// evaluate the gradient -> backward pass
+			for (int i = std::size(visits) - 1; i > -1; --i)
+			{
+				visits[i]->backward(dx_out);
+			}
+
+			return fx;
+		}
+	};
+
+	inline std::unique_ptr<Function> IExpression::Compile()
+	{
+		auto* root = this;
+		return std::make_unique<Function>(root);
+	}
+
 	inline double EvaluateCost(
 		std::shared_ptr<IExpression> root,
 		const std::vector<double>& x)
 	{
-		const auto to_visit = CreateVisitTree(root);
+		const auto to_visit = CreateVisitTree(root.get());
 
 		// evaluate the function -> forward pass
 		for (int i = 0; i < std::size(to_visit); ++i)
 		{
 			to_visit[i]->forward(x);
-			auto str_expr = to_visit[i]->ToString();
 		}
 		const double fx = root->value;
 
@@ -51,14 +99,13 @@ namespace runtimeAd {
 		const std::vector<double>& x,
 		std::vector<double>& dx)
 	{
-		const auto to_visit = CreateVisitTree(root);
+		const auto to_visit = CreateVisitTree(root.get());
 
 		root->ZeroGrad();
 
 		// evaluate the function -> forward pass
 		for (int i = 0; i < std::size(to_visit); ++i)
 		{
-			auto str_expr = to_visit[i]->ToString();
 			to_visit[i]->forward(x);
 		}
 		const double fx = root->value;
@@ -67,7 +114,6 @@ namespace runtimeAd {
 		// evaluate the gradient -> backward pass
 		for (int i = std::size(to_visit) - 1; i > -1; --i)
 		{
-			auto str_expr = to_visit[i]->ToString();
 			to_visit[i]->backward(dx);
 		}
 

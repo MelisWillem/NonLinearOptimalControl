@@ -29,6 +29,22 @@ class CartBehavior : public optimalControl::ContiniousSystemBehavior
 	}
 };
 
+void Normalize(std::vector<double>& x)
+{
+	double norm2 = 0;
+	for (int i = 0; i < std::size(x); ++i)
+	{
+		norm2 = norm2 + (x[i] * x[i]);
+	}
+	norm2 = std::sqrt(norm2);
+
+
+	for (int i = 0; i < std::size(x); ++i)
+	{
+		x[i] = x[i] / norm2;
+	}
+}
+
 TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 {
 	CartBehavior cont_system;
@@ -59,9 +75,9 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 		current_input_horizon[i] = 0;
 	}
 
-	int num_steps = 10;
+	int num_steps = 1000;
 	double cost = problem.Cost(current_input_horizon);
-	// double step_rate = 1e3;
+	double step_size_gradient = 1e-1;
 	std::cout << "Starting with a cost = " << cost << std::endl;
 	for (int i_step = 0; i_step < num_steps; ++i_step)
 	{
@@ -70,15 +86,22 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 
 		// std::vector<double> gradientFiniteDifference(s);
 		// problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
+		// for (int i = 0; i < std::size(gradientFiniteDifference); ++i)
+		// {
+		// 	auto diff = std::abs(gradient[i] - gradientFiniteDifference[i]);
+		// 	assert(diff < 1e-3);
+		// }
+
+		// Normalize(gradient);
 
 		// add gradient to inputs
 		for (int i = 0; i < std::size(gradient); ++i) {
-			current_input_horizon[i] = current_input_horizon[i] - gradient[i];
+			current_input_horizon[i] = current_input_horizon[i] - step_size_gradient * gradient[i];
 		}
 
 		// clip the input horizon
-		const double max_input = 1;
-		const double min_input = -1;
+		const double max_input = 10;
+		const double min_input = -10;
 		for (int i = 0; i < std::size(gradient); ++i) {
 			current_input_horizon[i] = std::max(current_input_horizon[i], min_input);
 			current_input_horizon[i] = std::min(current_input_horizon[i], max_input);
@@ -86,7 +109,7 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 
 		const double new_cost = problem.Cost(current_input_horizon);
 		const double res = cost - new_cost;
-		if (i_step % 1 == 0)
+		if (i_step % 10 == 0)
 		{
 			std::cout << "[" << i_step << "]" << " cost=" << new_cost << "  residual=" << res << std::endl;
 		}
