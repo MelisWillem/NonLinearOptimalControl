@@ -8,8 +8,20 @@
 
 namespace runtimeAd {
 
+	class Function;
+
 	class IExpression {
+		auto CreateVisitTree(IExpression* topNode)
+		{
+			std::vector<IExpression*> to_visit;
+			std::set<IExpression*> nodes_visited;
+
+			topNode->AddChildren(to_visit, nodes_visited);
+			to_visit.push_back(topNode);
+			return to_visit;
+		}
 	public:
+
 		double value = 0;
 		double grad = 0;
 
@@ -25,7 +37,7 @@ namespace runtimeAd {
 		virtual void backward(std::vector<double>& dx_out) = 0;
 
 		virtual void AddChildren(
-			std::vector<std::shared_ptr<IExpression>>& visits,
+			std::vector<IExpression*>& visits,
 			std::set<IExpression*>& nodes_already_visited) const {}
 
 		virtual std::string ToString() const = 0;
@@ -33,6 +45,8 @@ namespace runtimeAd {
 		virtual bool VisitEveryTime() const { return false; }
 		virtual bool VisitRequired() const { return true; }
 		virtual bool Skip() const { return false; }
+
+		std::unique_ptr<Function> Compile();
 	};
 
 	template<typename TExpr>
@@ -76,22 +90,19 @@ namespace runtimeAd {
 		}
 
 		virtual void AddChildren(
-			std::vector<std::shared_ptr<IExpression>>& visits,
+			std::vector<IExpression*>& visits,
 			std::set<IExpression*>& nodes_already_visited) const override {
-			auto left_str = left->ToString();
-			auto right_str = right->ToString();
-
 			// depth first
 			if (left->VisitRequired() && NeedsVisit(nodes_already_visited, left))
 			{
 				left->AddChildren(visits, nodes_already_visited);
-				visits.push_back(left);
+				visits.push_back(left.get());
 				nodes_already_visited.insert(left.get());
 			}
 			if (right->VisitRequired() && NeedsVisit(nodes_already_visited, right))
 			{
 				right->AddChildren(visits, nodes_already_visited);
-				visits.push_back(right);
+				visits.push_back(right.get());
 				nodes_already_visited.insert(right.get());
 			}
 		}
@@ -111,11 +122,11 @@ namespace runtimeAd {
 		}
 
 		virtual void AddChildren(
-			std::vector<std::shared_ptr<IExpression>>& visits,
+			std::vector<IExpression*>& visits,
 			std::set<IExpression*>& nodes_already_visited) const override {
 			if (expr->VisitRequired() && NeedsVisit(nodes_already_visited, expr)) {
 				expr->AddChildren(visits, nodes_already_visited);
-				visits.push_back(expr);
+				visits.push_back(expr.get());
 				nodes_already_visited.insert(expr.get());
 			}
 		}

@@ -5,6 +5,7 @@ namespace optimalControl {
 	class SingleShot {
 		using Expr = std::shared_ptr<runtimeAd::IExpression>;
 		Expr cost = runtimeAd::Constant(0);
+		runtimeAd::Function cost_function;
 		std::vector<std::shared_ptr<runtimeAd::ConstantValue>> init_state;
 		std::vector<std::shared_ptr<runtimeAd::ConstantValue>> ref_state;
 		std::vector<std::shared_ptr<runtimeAd::IExpression>> input_horizon;
@@ -57,7 +58,7 @@ namespace optimalControl {
 				state.push_back(std::dynamic_pointer_cast<runtimeAd::IExpression>(s));
 			}
 
-			// start with a cost of ozero
+			// start with a cost of zero
 			auto cost = std::dynamic_pointer_cast<runtimeAd::IExpression>(runtimeAd::Constant(0));
 			// set the cost of the initial state
 			for (int i = 0; i < params.num_of_states; i++)
@@ -85,16 +86,17 @@ namespace optimalControl {
 			}
 
 			this->cost = cost;
+			this->cost_function = runtimeAd::Function(cost);
 		}
 
-		double Cost(const std::vector<double>& inputs) { return  runtimeAd::EvaluateCost(cost, inputs); }
+		double Cost(const std::vector<double>& inputs) { return  cost_function.Eval(inputs); }
 		double CostGradient(
 			const std::vector<double>& inputs,
 			std::vector<double>& gradient_out) {
 			assert(std::size(inputs) == gradient_size);
 			assert(std::size(gradient_out) == gradient_size);
 
-			const auto fx = runtimeAd::EvaluateGradient(cost, inputs, gradient_out);
+			const auto fx = cost_function.EvalGradient(inputs, gradient_out);
 
 			return fx;
 		}
