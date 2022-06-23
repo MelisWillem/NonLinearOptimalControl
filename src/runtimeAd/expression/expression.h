@@ -43,8 +43,7 @@ namespace runtimeAd {
 		virtual std::string ToString() const = 0;
 
 		virtual bool VisitEveryTime() const { return false; }
-		virtual bool VisitRequired() const { return true; }
-		virtual bool Skip() const { return false; }
+		virtual bool GradientRequired() const { return true; }
 
 		std::unique_ptr<Function> Compile();
 	};
@@ -52,12 +51,6 @@ namespace runtimeAd {
 	template<typename TExpr>
 	inline bool NeedsVisit(std::set<IExpression*>& already_visited, const std::shared_ptr<TExpr>& node)
 	{
-		if (node->Skip())
-		{
-			// we can skip it
-			return false;
-		}
-
 		IExpression* expr = node.get();
 		const bool node_is_in_set = already_visited.find(expr) != already_visited.end();
 		if (node_is_in_set)
@@ -93,13 +86,13 @@ namespace runtimeAd {
 			std::vector<IExpression*>& visits,
 			std::set<IExpression*>& nodes_already_visited) const override {
 			// depth first
-			if (left->VisitRequired() && NeedsVisit(nodes_already_visited, left))
+			if (left->GradientRequired() && NeedsVisit(nodes_already_visited, left))
 			{
 				left->AddChildren(visits, nodes_already_visited);
 				visits.push_back(left.get());
 				nodes_already_visited.insert(left.get());
 			}
-			if (right->VisitRequired() && NeedsVisit(nodes_already_visited, right))
+			if (right->GradientRequired() && NeedsVisit(nodes_already_visited, right))
 			{
 				right->AddChildren(visits, nodes_already_visited);
 				visits.push_back(right.get());
@@ -124,7 +117,7 @@ namespace runtimeAd {
 		virtual void AddChildren(
 			std::vector<IExpression*>& visits,
 			std::set<IExpression*>& nodes_already_visited) const override {
-			if (expr->VisitRequired() && NeedsVisit(nodes_already_visited, expr)) {
+			if (expr->GradientRequired() && NeedsVisit(nodes_already_visited, expr)) {
 				expr->AddChildren(visits, nodes_already_visited);
 				visits.push_back(expr.get());
 				nodes_already_visited.insert(expr.get());
