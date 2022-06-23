@@ -7,11 +7,11 @@
 constexpr int number_of_states = 4;
 constexpr int number_of_inputs = 2;
 
-// # The system behavior :
-// # dot_x0 = x_2
-// # dot_x1 = x_3
-// # dot_x2 = u_0 / m
-// # dot_x3 = u_1 / m
+// The system behavior :
+// dot_x0 = x_2
+// dot_x1 = x_3
+// dot_x2 = u_0 / m
+// dot_x3 = u_1 / m
 class CartBehavior : public optimalControl::ContiniousSystemBehavior
 {
 	virtual multi_expr dot(multi_expr& current_state, multi_expr& current_input) override {
@@ -84,8 +84,9 @@ TEST_CASE("Give_Simpl_Cart_System_Move_To_Reference_Single_Shot")
 	for (int i_step = 0; i_step < num_steps; ++i_step)
 	{
 		std::vector<double> gradient(s);
-		problem.CostGradient(current_input_horizon, gradient);
+		const double current_cost = problem.CostGradient(current_input_horizon, gradient);
 
+		// Test if the gradient is about the same as the finite difference once.
 		std::vector<double> gradientFiniteDifference(s);
 		problem.CostGradientFiniteDifference(current_input_horizon, gradientFiniteDifference);
 		for (int i = 0; i < std::size(gradientFiniteDifference); ++i)
