@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+#include <cmath>
 #include<runtimeAd/expression/expression.h>
 #include<memory>
 
@@ -17,7 +19,7 @@ namespace runtimeAd {
 			const std::vector<double>& x)  override
 		{
 			value = left->value / right->value;
-			assert(!isnan(value));
+			assert(!std::isnan(value));
 		}
 
 		virtual void backward(std::vector<double>& dx_out)  override

@@ -74,7 +74,7 @@ namespace runtimeAd {
 			std::shared_ptr<IExpression> right) :
 			left(left), right(right) {}
 
-		virtual void ZeroGrad()
+		virtual void ZeroGrad() override
 		{
 			grad = 0;
 			value = 0;
@@ -107,7 +107,7 @@ namespace runtimeAd {
 
 		UnitaryExpression(std::shared_ptr<IExpression> expr) : expr(expr) {}
 
-		virtual void ZeroGrad()
+		virtual void ZeroGrad() override
 		{
 			grad = 0;
 			value = 0;

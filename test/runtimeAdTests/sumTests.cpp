@@ -1,4 +1,5 @@
-#include<catch2/catch.hpp>
+#include<catch2/catch_test_macros.hpp>
+#include<catch2/catch_approx.hpp>
 #include<runtimeAd/runtimeAd.h>
 
 using namespace runtimeAd;
@@ -14,8 +15,8 @@ TEST_CASE("Given_Sum_Check_Gradient")
 	std::vector<double> dx(2);
 	EvaluateGradient(f, x, dx);
 
-	auto expected_grad_0 = Approx(1.0).epsilon(1e-6);
+	auto expected_grad_0 = Catch::Approx(1.0).epsilon(1e-6);
 	REQUIRE(dx[0] == expected_grad_0);
-	auto expected_grad_1 = Approx(1.0).epsilon(1e-6);
+	auto expected_grad_1 = Catch::Approx(1.0).epsilon(1e-6);
 	REQUIRE(dx[1] == expected_grad_1);
 }
