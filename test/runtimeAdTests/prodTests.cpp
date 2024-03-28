@@ -1,4 +1,5 @@
-#include<catch2/catch.hpp>
+#include<catch2/catch_test_macros.hpp>
+#include<catch2/catch_approx.hpp>
 #include<runtimeAd/runtimeAd.h>
 
 using namespace runtimeAd;
@@ -14,9 +15,9 @@ TEST_CASE("Given_Prod_Check_Gradient")
 	std::vector<double> dx(2);
 	EvaluateGradient(f, x, dx);
 
-	auto expected_grad_0 = Approx(b->Value(x)).epsilon(1e-6);
+	auto expected_grad_0 = Catch::Approx(b->Value(x)).epsilon(1e-6);
 	REQUIRE(dx[0] == expected_grad_0);
-	auto expected_grad_1 = Approx(a->Value(x)).epsilon(1e-6);
+	auto expected_grad_1 = Catch::Approx(a->Value(x)).epsilon(1e-6);
 	REQUIRE(dx[1] == expected_grad_1);
 }
 
@@ -29,7 +30,7 @@ TEST_CASE("Compare_Finite_Diff_With_Back_Prob_Prod")
 	std::vector<double> x = { 2, 3 };
 	auto f_eval = EvaluateCost(f, x);
 
-	REQUIRE(f_eval == Approx(2 * 2 + 2 * 3 + 2 * 3));
+	REQUIRE(f_eval == Catch::Approx(2 * 2 + 2 * 3 + 2 * 3));
 
 	std::vector<double> dx_backprop(2);
 	EvaluateGradient(f, x, dx_backprop);
@@ -38,6 +39,6 @@ TEST_CASE("Compare_Finite_Diff_With_Back_Prob_Prod")
 
 	for (int i = 0; i < std::size(dx_backprop); i++)
 	{
-		REQUIRE(dx_backprop[i] == Approx(dx_finite_diff[i]).epsilon(1e-6));
+		REQUIRE(dx_backprop[i] == Catch::Approx(dx_finite_diff[i]).epsilon(1e-6));
 	}
 }

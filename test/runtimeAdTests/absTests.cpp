@@ -1,4 +1,5 @@
-#include<catch2/catch.hpp>
+#include<catch2/catch_test_macros.hpp>
+#include<catch2/catch_approx.hpp>
 #include<runtimeAd/runtimeAd.h>
 
 using namespace runtimeAd;
@@ -17,5 +18,5 @@ TEST_CASE("Compare_Finite_Diff_With_Back_Prob_Abs")
 	std::vector<double> dx_finite_diff(1);
 	EvaluateGradientFiniteDifference(f, x, dx_finite_diff);
 
-	REQUIRE(dx_backprop[0] == Approx(dx_finite_diff[0]).epsilon(1e-6));
+	REQUIRE(dx_backprop[0] == Catch::Approx(dx_finite_diff[0]).epsilon(1e-6));
 }

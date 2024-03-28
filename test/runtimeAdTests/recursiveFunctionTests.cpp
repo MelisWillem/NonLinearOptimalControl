@@ -1,4 +1,5 @@
-#include<catch2/catch.hpp>
+#include<catch2/catch_test_macros.hpp>
+#include<catch2/catch_approx.hpp>
 #include<runtimeAd/runtimeAd.h>
 
 using namespace runtimeAd;
@@ -23,7 +24,7 @@ TEST_CASE("Give_Cost_Function_With_Same_Node_Twice_In_Bin_op_Compare_BackAD_Fini
 
 	for (int i = 0; i < std::size(dx); ++i)
 	{
-		REQUIRE(dx[i] == Approx(dxFiniteDifference[i]).epsilon(1e-4));
+		REQUIRE(dx[i] == Catch::Approx(dxFiniteDifference[i]).epsilon(1e-4));
 	}
 }
 
@@ -44,6 +45,6 @@ TEST_CASE("Give_Cost_Function_With_Same_Node_Twice_Compare_BackAD_Finite_diff")
 
 	for (int i = 0; i < std::size(dx); ++i)
 	{
-		REQUIRE(dx[i] == Approx(dxFiniteDifference[i]).epsilon(1e-4));
+		REQUIRE(dx[i] == Catch::Approx(dxFiniteDifference[i]).epsilon(1e-4));
 	}
 }

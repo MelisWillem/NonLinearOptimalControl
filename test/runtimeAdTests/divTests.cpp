@@ -1,4 +1,5 @@
-#include<catch2/catch.hpp>
+#include<catch2/catch_test_macros.hpp>
+#include<catch2/catch_approx.hpp>
 #include<runtimeAd/runtimeAd.h>
 
 using namespace runtimeAd;
@@ -20,6 +21,6 @@ TEST_CASE("Compare_Finite_Diff_With_BackProb_Div")
 
 	for (int i = 0; i < std::size(dx_backprop); i++)
 	{
-		REQUIRE(dx_backprop[i] == Approx(dx_finite_diff[i]).epsilon(1e-6));
+		REQUIRE(dx_backprop[i] == Catch::Approx(dx_finite_diff[i]).epsilon(1e-6));
 	}
 }
